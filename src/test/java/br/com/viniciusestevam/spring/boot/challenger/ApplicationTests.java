@@ -12,7 +12,7 @@ class ApplicationTests {
 	private WebTestClient webTestClient;
 
 	@Test
-	void testeCreateTodoSuccess(){
+	void testCreateTodoSuccess(){
 		var todo = new Todo("todo 1", "desc todo 1", false, 1);
 
 		webTestClient
@@ -30,7 +30,7 @@ class ApplicationTests {
 				.jsonPath("$[0].prioridade").isEqualTo(todo.getPrioridade());
 	}
 	@Test
-	void testeCreateTodoFailure (){
+	void testCreateTodoFailure (){
 		webTestClient
 				.post()
 				.uri("/todos")
@@ -39,5 +39,68 @@ class ApplicationTests {
 				.exchange()
 				.expectStatus().isBadRequest();
 	}
+
+	@Test
+	void testGetTodos(){
+		webTestClient
+				.get()
+				.uri("/todos")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$").isArray();
+	}
+
+	@Test
+	void testUpdateTodoSuccess(){
+		var updateTodo = new Todo(14L, "todo 2", "desc todo 2", true, 1);
+		webTestClient
+				.put()
+				.uri("/todos")
+				.bodyValue(updateTodo)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$").isArray()
+				.jsonPath("$[0].id").isEqualTo(updateTodo.getId())
+				.jsonPath("$[0].nome").isEqualTo(updateTodo.getNome())
+				.jsonPath("$[0].descricao").isEqualTo(updateTodo.getDescricao())
+				.jsonPath("$[0].realizado").isEqualTo(updateTodo.isRealizado())
+				.jsonPath("$[0].prioridade").isEqualTo(updateTodo.getPrioridade());
+	}
+
+	@Test
+	void testUpdateTodoFailure(){
+		var updateTodo = new Todo(0L,"", "", true, 1);
+		webTestClient
+				.put()
+				.uri("/todos")
+				.bodyValue(new Todo(0L,"", "", true, 1))
+				.exchange()
+				.expectStatus().is5xxServerError();
+	}
+
+	@Test
+	public void testDeleteTodoSuccess() {
+		webTestClient
+				.delete()
+				.uri("/todos/" + 14)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$").isArray();
+	}
+
+	@Test
+	public void testDeleteTodoFailure() {
+		webTestClient
+				.delete()
+				.uri("/todos/" + 100)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+
+
 
 }
