@@ -1,11 +1,14 @@
 package br.com.viniciusestevam.spring.boot.challenger.service;
 
 import br.com.viniciusestevam.spring.boot.challenger.entity.Todo;
+import br.com.viniciusestevam.spring.boot.challenger.exception.BadRequestException;
+import br.com.viniciusestevam.spring.boot.challenger.repository.TodoRepository;
 import br.com.viniciusestevam.spring.boot.challenger.repository.TodoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.prefs.BackingStoreException;
 
 @Service
 public class TodoService {
@@ -29,12 +32,16 @@ public class TodoService {
     }
     
     public List<Todo> update(Todo todo){
-        todoRepository.save(todo);
+        todoRepository.findById(todo.getId()).ifPresentOrElse((existingTodo) -> todoRepository.save(todo) , () -> {
+            throw new BadRequestException("Todo de ID: %d não existe".formatted(todo.getId()));
+        });
         return list();
     }
     
     public List<Todo> delete(Long id){
-        todoRepository.deleteById(id);
+        todoRepository.findById(id).ifPresentOrElse((todo) -> todoRepository.delete(todo), () -> {
+            throw new BadRequestException("Todo de ID: %d não existe".formatted(id));
+        });
         return list();
     }
 }

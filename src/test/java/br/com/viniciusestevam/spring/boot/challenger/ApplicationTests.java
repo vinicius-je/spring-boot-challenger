@@ -77,7 +77,7 @@ class ApplicationTests {
 				.uri("/todos")
 				.bodyValue(new Todo(0L,"", "", true, 1))
 				.exchange()
-				.expectStatus().is5xxServerError();
+				.expectStatus().isBadRequest();
 	}
 
 	@Test
@@ -99,8 +99,4 @@ class ApplicationTests {
 				.exchange()
 				.expectStatus().isBadRequest();
 	}
-
-
-
-
 }
